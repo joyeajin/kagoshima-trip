@@ -357,6 +357,30 @@
         <div id="cList"></div>
       </section>
 
+      <section id="memo">
+        <div class="card">
+          <div class="row">
+            <textarea
+              id="mBody"
+              rows="4"
+              placeholder="메모를 입력하세요"
+            ></textarea>
+          </div>
+          <div class="row">
+            <button class="p" id="mSave" onclick="saveMemo()">저장</button>
+            <button
+              class="s"
+              id="mCancel"
+              style="display: none"
+              onclick="cancelMemo()"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+        <div id="mList"></div>
+      </section>
+
       <section id="share">
         <div class="card">
           <b>👥 일행과 실시간 공유</b>
@@ -439,6 +463,7 @@
         ].map((t) => ({ t, d: 0 })),
         rate: 920,
         budget: 0,
+        memos: [],
         ts: 0,
       });
       let S = JSON.parse(localStorage.getItem(KEY) || "null") || def();
@@ -489,7 +514,7 @@
         }
       }
       const busy = () =>
-        ["pName", "pAddr", "pMemo", "eName", "eAmt", "cText"].some(
+        ["pName", "pAddr", "pMemo", "eName", "eAmt", "cText", "mBody"].some(
           (i) => $(i) === document.activeElement && $(i).value,
         );
       function connect() {
@@ -537,6 +562,7 @@
       setInterval(() => pull(false), 4000);
       const tabs = [
         ["plan", "일정"],
+        ["memo", "메모"],
         ["flight", "항공"],
         ["money", "가계부"],
         ["check", "체크"],
@@ -864,6 +890,59 @@
           )
           .join("");
       }
+      let editMemo = null;
+      function saveMemo() {
+        const b = $("mBody").value.trim();
+        if (!b) return;
+        S.memos = S.memos || [];
+        if (editMemo) {
+          const m = S.memos.find((x) => x.id == editMemo);
+          if (m) {
+            m.body = b;
+            m.upd = Date.now();
+          }
+        } else {
+          S.memos.push({ id: Date.now(), body: b, upd: Date.now() });
+        }
+        cancelMemo();
+        save();
+        renderMemo();
+      }
+      function editM(id) {
+        const m = (S.memos || []).find((x) => x.id == id);
+        if (!m) return;
+        editMemo = id;
+        $("mBody").value = m.body;
+        $("mSave").textContent = "수정 완료";
+        $("mCancel").style.display = "";
+        window.scrollTo(0, 0);
+      }
+      function cancelMemo() {
+        editMemo = null;
+        $("mBody").value = "";
+        $("mSave").textContent = "저장";
+        $("mCancel").style.display = "none";
+      }
+      function delMemo(id) {
+        if (!confirm("삭제할까요?")) return;
+        S.memos = S.memos.filter((x) => x.id != id);
+        save();
+        renderMemo();
+      }
+      function renderMemo() {
+        const a = [...(S.memos || [])].reverse();
+        $("mList").innerHTML =
+          a
+            .map(
+              (m) => `<div class="card">
+    <div style="white-space:pre-wrap;font-size:14px">${esc(m.body)}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+      <span class="muted">${new Date(m.upd).toLocaleString("ko-KR")}</span>
+      <span><button class="s" onclick="editM(${m.id})">수정</button> <button class="s" onclick="delMemo(${m.id})">삭제</button></span>
+    </div></div>`,
+            )
+            .join("") || '<div class="card muted">메모가 없어요.</div>';
+      }
       function exportData() {
         const a = document.createElement("a");
         a.href = URL.createObjectURL(
@@ -888,6 +967,7 @@
         renderFlights();
         renderMoney();
         renderCheck();
+        renderMemo();
         // $("apiKey").value = apiKey;
       }
       render();
