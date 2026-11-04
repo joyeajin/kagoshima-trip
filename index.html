@@ -244,7 +244,7 @@
       <section id="flight">
         <div class="card">
           <b>항공편 추가</b>
-          <!-- <div class="row">
+          <div class="row">
             <input
               id="fNo"
               placeholder="편명 예: KE787"
@@ -265,7 +265,7 @@
           </div>
           <div class="muted" id="fMsg">
             키가 없거나 실패하면 아래 수동 입력(공항코드 → 공항명 자동).
-          </div> -->
+          </div>
           <div class="row">
             <input id="fDep" placeholder="출발 ICN" maxlength="3" /><input
               id="fArr"
@@ -759,43 +759,43 @@
           };
         });
       }
-      //   async function lookupFlight() {
-      //     const no = $("fNo").value.replace(/\s/g, "").toUpperCase(),
-      //       d = $("fDate").value;
-      //     apiKey = $("apiKey").value;
-      //     localStorage.setItem("rkey", apiKey);
-      //     if (!no || !d) return;
-      //     if (!apiKey) {
-      //       $("fMsg").textContent =
-      //         "API 키가 없어 자동조회 불가 → 수동 입력하세요.";
-      //       return;
-      //     }
-      //     $("fMsg").textContent = "조회 중...";
-      //     try {
-      //       const r = await fetch(
-      //         `https://aerodatabox.p.rapidapi.com/flights/number/${no}/${d}`,
-      //         {
-      //           headers: {
-      //             "x-rapidapi-key": apiKey,
-      //             "x-rapidapi-host": "aerodatabox.p.rapidapi.com",
-      //           },
-      //         },
-      //       );
-      //       const f = (await r.json())[0];
-      //       if (!f) throw 0;
-      //       $("fDep").value = f.departure.airport.iata;
-      //       $("fArr").value = f.arrival.airport.iata;
-      //       const t = (x) =>
-      //         (x && (x.local || "")).replace(" ", "T").slice(0, 16);
-      //       $("fDT").value = t(f.departure.scheduledTime);
-      //       $("fAT").value = t(f.arrival.scheduledTime);
-      //       $("fAc").value = (f.aircraft || {}).model || "";
-      //       $("fMsg").textContent = "자동 입력 완료. 확인 후 저장하세요.";
-      //     } catch (e) {
-      //       $("fMsg").textContent =
-      //         "조회 실패. (예약 오픈 전 날짜는 스케줄이 없을 수 있어요) 수동 입력해 주세요.";
-      //     }
-      //   }
+      async function lookupFlight() {
+        const no = $("fNo").value.replace(/\s/g, "").toUpperCase(),
+          d = $("fDate").value;
+        apiKey = $("apiKey").value;
+        localStorage.setItem("rkey", apiKey);
+        if (!no || !d) return;
+        if (!apiKey) {
+          $("fMsg").textContent =
+            "API 키가 없어 자동조회 불가 → 수동 입력하세요.";
+          return;
+        }
+        $("fMsg").textContent = "조회 중...";
+        try {
+          const r = await fetch(
+            `https://aerodatabox.p.rapidapi.com/flights/number/${no}/${d}`,
+            {
+              headers: {
+                "x-rapidapi-key": apiKey,
+                "x-rapidapi-host": "aerodatabox.p.rapidapi.com",
+              },
+            },
+          );
+          const f = (await r.json())[0];
+          if (!f) throw 0;
+          $("fDep").value = f.departure.airport.iata;
+          $("fArr").value = f.arrival.airport.iata;
+          const t = (x) =>
+            (x && (x.local || "")).replace(" ", "T").slice(0, 16);
+          $("fDT").value = t(f.departure.scheduledTime);
+          $("fAT").value = t(f.arrival.scheduledTime);
+          $("fAc").value = (f.aircraft || {}).model || "";
+          $("fMsg").textContent = "자동 입력 완료. 확인 후 저장하세요.";
+        } catch (e) {
+          $("fMsg").textContent =
+            "조회 실패. (예약 오픈 전 날짜는 스케줄이 없을 수 있어요) 수동 입력해 주세요.";
+        }
+      }
       function addFlight() {
         const no = $("fNo").value.toUpperCase();
         if (!no) return;
